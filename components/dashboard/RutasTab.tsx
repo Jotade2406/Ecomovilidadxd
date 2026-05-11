@@ -407,10 +407,13 @@ export default function RutasTab() {
               filtered.map((ruta) => {
                 const isSelected = selectedId === ruta.id;
                 return (
-                  <button
+                  <div
                     key={ruta.id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setSelectedId(ruta.id)}
-                    className="group flex w-full items-center gap-3 px-4 py-3 text-left transition-all duration-100 relative"
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedId(ruta.id); } }}
+                    className="group flex w-full items-center gap-3 px-4 py-3 text-left transition-all duration-100 relative cursor-pointer"
                     style={{ background: isSelected ? 'var(--primary-glow)' : 'transparent', borderBottom: '1px solid var(--border-subtle)' }}
                     onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--bg-hover)'; }}
                     onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
@@ -430,7 +433,7 @@ export default function RutasTab() {
                     >
                       <Trash2 size={13} />
                     </button>
-                  </button>
+                  </div>
                 );
               })
             )}

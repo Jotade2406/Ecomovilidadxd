@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { conectar, suscribir, desconectar, isConectado } from '@/lib/stompClient';
+import { conectar, suscribir, desconectar } from '@/lib/stompClient';
 import type { IMessage } from '@stomp/stompjs';
 
 interface UbicacionEnVivo {
@@ -57,11 +57,8 @@ export function useUbicacionEnVivo(viajeId: string | null): UseUbicacionEnVivoRe
       }
     );
 
-    // Si ya está conectado, suscribirse directamente
-    if (isConectado()) {
-      setConectado(true);
-      unsubRef.current = suscribir(topic, handleMessage);
-    }
+    // La suscripción se maneja dentro del callback onConnect
+    // y el stompClient encola si la conexión no está lista aún
 
     return () => {
       unsubRef.current?.();
