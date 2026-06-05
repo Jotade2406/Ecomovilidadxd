@@ -1,0 +1,5 @@
+ecomovilidad-backend-java/target/
+core-plataform/ecomovilidad-core/target/
+ecomovilidad-frontend/
+.git/
+*.md

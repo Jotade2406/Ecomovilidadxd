@@ -1,0 +1,16 @@
+services:
+  postgres-db:
+    image: postgres:15
+    container_name: ecomovilidad-postgres-definitivo
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: ecomovilidad
+    ports:
+      - "5433:5432"
+
+  mongo-db:
+    image: mongo:latest
+    container_name: ecomovilidad-mongo
+    ports:
+      - "27017:27017"

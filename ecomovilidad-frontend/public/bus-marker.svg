@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 52" width="64" height="52">
+  <!-- Sombra -->
+  <ellipse cx="32" cy="50" rx="16" ry="3" fill="black" opacity="0.18"/>
+
+  <!-- Cuerpo del bus -->
+  <rect x="4" y="6" width="52" height="34" rx="6" fill="#10b981" stroke="#059669" stroke-width="1.5"/>
+
+  <!-- Techo (degradado simulado con overlay) -->
+  <rect x="6" y="6" width="48" height="9" rx="5" fill="#34d399" opacity="0.35"/>
+
+  <!-- Frente del bus -->
+  <rect x="48" y="9" width="7" height="25" rx="5" fill="#047857"/>
+
+  <!-- Parabrisas -->
+  <rect x="49" y="11" width="5" height="12" rx="2" fill="#bae6fd" opacity="0.92"/>
+
+  <!-- Ventanas laterales -->
+  <rect x="8"  y="10" width="9" height="9" rx="2.5" fill="#a5f3fc" opacity="0.95"/>
+  <rect x="21" y="10" width="9" height="9" rx="2.5" fill="#a5f3fc" opacity="0.95"/>
+  <rect x="34" y="10" width="9" height="9" rx="2.5" fill="#a5f3fc" opacity="0.95"/>
+
+  <!-- Puerta -->
+  <rect x="8" y="23" width="7" height="15" rx="2" fill="#d1fae5" opacity="0.75"/>
+  <line x1="11.5" y1="23" x2="11.5" y2="38" stroke="#6ee7b7" stroke-width="1"/>
+
+  <!-- Franja inferior -->
+  <rect x="4" y="37" width="52" height="3" rx="1.5" fill="#065f46"/>
+
+  <!-- Ruedas -->
+  <circle cx="15" cy="44" r="6" fill="#1e293b"/>
+  <circle cx="15" cy="44" r="3.5" fill="#334155"/>
+  <circle cx="15" cy="44" r="1.5" fill="#64748b"/>
+
+  <circle cx="46" cy="44" r="6" fill="#1e293b"/>
+  <circle cx="46" cy="44" r="3.5" fill="#334155"/>
+  <circle cx="46" cy="44" r="1.5" fill="#64748b"/>
+
+  <!-- Faro delantero (amarillo) -->
+  <rect x="50" y="28" width="5" height="4" rx="1.5" fill="#fde047"/>
+
+  <!-- Luz trasera (rojo) -->
+  <rect x="5" y="28" width="4" height="4" rx="1.5" fill="#f87171"/>
+
+  <!-- Texto "BUS" en costado -->
+  <text x="27" y="32" font-family="Arial, sans-serif" font-size="7" font-weight="bold" fill="white" opacity="0.6" text-anchor="middle">ECO</text>
+</svg>

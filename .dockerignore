@@ -1,0 +1,9 @@
+# Excluir para el build (contexto raíz)
+ecomovilidad-frontend/node_modules/
+ecomovilidad-frontend/.next/
+ecomovilidad-backend-java/target/
+core-plataform/core-platform/target/
+iam-service/target/
+ai-service/**/target/
+.git/
+*.md

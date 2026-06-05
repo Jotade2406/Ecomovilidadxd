@@ -1,0 +1,88 @@
+# ═══════════════════════════════════════════════════════════════
+# EcoMovilidad AI — Backend Java Spring Boot 3.3
+# Migración desde .NET 8 | Configuración unificada
+# ═══════════════════════════════════════════════════════════════
+
+server:
+  port: 5034
+
+spring:
+  application:
+    name: ecomovilidad-backend-java
+
+  # ─── PostgreSQL (misma BD que .NET) ─────────────────────────
+  datasource:
+    url: jdbc:postgresql://localhost:5433/ecomovilidad
+    username: root
+    password: 123456
+    driver-class-name: org.postgresql.Driver
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    default-schema: public
+    baseline-on-migrate: true
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: public
+        format_sql: true
+        physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: true
+    open-in-view: false
+
+  # ─── MongoDB ────────────────────────────────────────────────
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017
+      database: ecomovilidad_evidencias
+
+  # ─── Jackson (camelCase para JSON, igual que .NET) ──────────
+  jackson:
+    property-naming-strategy: LOWER_CAMEL_CASE
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+# ─── JWT Settings ─────────────────────────────────────────────
+jwt:
+  secret: Aca_Va_Mi_Llave_Secreta_Para_El_Proyecto_EcoMovilidad_2026
+  issuer: EcoMovilidadAPI
+  audience: EcoMovilidadUsers
+  expiration-hours: 24
+
+# ─── Springdoc (Swagger UI) ──────────────────────────────────
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
+# ─── Microservicios internos ──────────────────────────────────
+services:
+  ai-service:
+    url: ${AI_SERVICE_URL:http://localhost:8091}
+  iam-service:
+    url: ${IAM_SERVICE_URL:http://localhost:8080}
+
+# ─── Anthropic / Claude API ───────────────────────────────────
+anthropic:
+  api-key: ${ANTHROPIC_API_KEY:}
+
+# ─── Super Administrador Central ──────────────────────────────
+superadmin:
+  password: EcoAdmin2026
+
+# ─── Logging ──────────────────────────────────────────────────
+logging:
+  level:
+    root: INFO
+    com.ecomovilidad: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.springframework.security: INFO
