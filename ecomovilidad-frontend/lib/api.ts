@@ -42,10 +42,16 @@ async function request<T>(
       headers,
     });
 
-    // 401 → token expirado o inválido → redirigir a login
+    // 401 → si había token guardado es sesión expirada → redirigir
+    //       si no había token es fallo de login → devolver error del servidor
     if (response.status === 401) {
-      clearAuthAndRedirect();
-      return { data: null, error: 'Sesión expirada', status: 401 };
+      if (getToken()) {
+        clearAuthAndRedirect();
+        return { data: null, error: 'Sesión expirada', status: 401 };
+      }
+      const errData = await response.json().catch(() => null);
+      const errorMessage = errData?.message || errData?.title || 'Credenciales incorrectas';
+      return { data: null, error: errorMessage, status: 401 };
     }
 
     // 204 No Content (ej: DELETE exitoso)

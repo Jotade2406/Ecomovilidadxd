@@ -14,12 +14,13 @@ import type { AsignacionRutaResponse } from '@/services/asignacionesService';
 import type { ViajeDto } from '@/hooks/useViajeActual';
 import {
   Plus, PowerOff, Trash2, Route, Truck, User, Loader2, Link2,
-  AlertTriangle, RefreshCw, Play, CheckCircle, XCircle,
+  AlertTriangle, RefreshCw, Play, CheckCircle, XCircle, Users, MapPin,
 } from 'lucide-react';
 
 interface RutaMin { id: string; nombre: string; }
 interface VehiculoMin { id: string; placa: string; }
 interface ConductorMin { id: string; nombre: string; }
+interface EstudianteItem { id: string; nombre: string; paradaAsignada: string; }
 
 export default function AsignacionesTab() {
   const { asignaciones, loading, crear, desactivar, eliminar, recargar } = useAsignaciones();
@@ -32,6 +33,14 @@ export default function AsignacionesTab() {
   const [iniciandoId, setIniciandoId] = useState<string | null>(null);
   const [completandoId, setCompletandoId] = useState<string | null>(null);
   const [cancelandoId, setCancelandoId] = useState<string | null>(null);
+
+  // ── Estado modal asignar estudiantes ────────────────────────────
+  const [showAsignarEst, setShowAsignarEst] = useState(false);
+  const [asignarViajeId, setAsignarViajeId] = useState<string | null>(null);
+  const [estudiantes, setEstudiantes] = useState<EstudianteItem[]>([]);
+  const [loadingEst, setLoadingEst] = useState(false);
+  const [selEst, setSelEst] = useState<Set<string>>(new Set());
+  const [asignando, setAsignando] = useState(false);
 
   // ── Estado modal crear asignación ────────────────────────────────
   const [showCrear, setShowCrear] = useState(false);
@@ -167,6 +176,38 @@ export default function AsignacionesTab() {
     await Promise.all([recargar(), cargarViajes()]);
   };
 
+  // ── Asignar estudiantes ──────────────────────────────────────────
+  const openAsignarEst = async (viajeId: string) => {
+    setAsignarViajeId(viajeId);
+    setSelEst(new Set());
+    setShowAsignarEst(true);
+    setLoadingEst(true);
+    const { data } = await api.get<EstudianteItem[]>('/api/Comunidad/estudiantes');
+    setEstudiantes(data ?? []);
+    setLoadingEst(false);
+  };
+
+  const toggleEst = (id: string) => {
+    setSelEst((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const handleAsignarEstudiantes = async () => {
+    if (!asignarViajeId || selEst.size === 0) return;
+    setAsignando(true);
+    const { error } = await api.post(`/api/Viajes/${asignarViajeId}/asignar-estudiantes`, {
+      estudianteIds: Array.from(selEst),
+    });
+    setAsignando(false);
+    if (error) { notificarError('Error al asignar: ' + error); return; }
+    notificarExito(`${selEst.size} estudiante(s) asignados al viaje`);
+    setShowAsignarEst(false);
+    await cargarViajes();
+  };
+
   // ── Columnas ─────────────────────────────────────────────────────
   const columns: TableColumn<AsignacionRutaResponse>[] = [
     {
@@ -230,17 +271,26 @@ export default function AsignacionesTab() {
               {v.estado}
             </Badge>
             {v.estado === 'EnCurso' && (
-              <button
-                onClick={() => handleCompletarViaje(v.id)}
-                disabled={completandoId === v.id}
-                className="flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition disabled:opacity-50"
-                style={{ background: 'rgba(16,185,129,0.1)', color: '#10B981', border: '1px solid rgba(16,185,129,0.25)' }}
-              >
-                {completandoId === v.id
-                  ? <Loader2 size={9} className="animate-spin" />
-                  : <CheckCircle size={9} />}
-                Completar
-              </button>
+              <>
+                <button
+                  onClick={() => openAsignarEst(v.id)}
+                  className="flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition"
+                  style={{ background: 'rgba(99,102,241,0.1)', color: '#818CF8', border: '1px solid rgba(99,102,241,0.25)' }}
+                >
+                  <Users size={9} /> Estudiantes
+                </button>
+                <button
+                  onClick={() => handleCompletarViaje(v.id)}
+                  disabled={completandoId === v.id}
+                  className="flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition disabled:opacity-50"
+                  style={{ background: 'rgba(16,185,129,0.1)', color: '#10B981', border: '1px solid rgba(16,185,129,0.25)' }}
+                >
+                  {completandoId === v.id
+                    ? <Loader2 size={9} className="animate-spin" />
+                    : <CheckCircle size={9} />}
+                  Completar
+                </button>
+              </>
             )}
             <button
               onClick={() => handleCancelarViaje(v.id)}
@@ -457,6 +507,81 @@ export default function AsignacionesTab() {
         <p className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>
           ¿Estás seguro de que deseas eliminar esta asignación? Esta acción no se puede deshacer.
         </p>
+      </Modal>
+
+      {/* Modal asignar estudiantes */}
+      <Modal
+        open={showAsignarEst}
+        onClose={() => setShowAsignarEst(false)}
+        title="Asignar estudiantes al viaje"
+        maxWidth="max-w-lg"
+        footer={
+          <div className="flex gap-2">
+            <Button variant="ghost" size="md" onClick={() => setShowAsignarEst(false)} className="flex-1">
+              Cancelar
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              onClick={handleAsignarEstudiantes}
+              loading={asignando}
+              disabled={selEst.size === 0}
+              className="flex-1"
+            >
+              Asignar {selEst.size > 0 ? `(${selEst.size})` : ''}
+            </Button>
+          </div>
+        }
+      >
+        {loadingEst ? (
+          <div className="flex flex-col items-center py-10 gap-2">
+            <Loader2 size={20} className="animate-spin text-emerald-500" />
+            <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Cargando estudiantes...</p>
+          </div>
+        ) : estudiantes.length === 0 ? (
+          <div className="flex flex-col items-center py-8 gap-2 text-center">
+            <Users size={28} style={{ color: 'var(--text-muted)' }} />
+            <p className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>
+              No hay estudiantes registrados
+            </p>
+            <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+              Los estudiantes aparecen aquí cuando se registran con rol Estudiante
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
+            <p className="text-[11px] mb-3" style={{ color: 'var(--text-muted)' }}>
+              Seleccioná los estudiantes a agregar a este viaje
+            </p>
+            {estudiantes.map((est) => (
+              <label
+                key={est.id}
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 cursor-pointer transition-colors"
+                style={{
+                  background: selEst.has(est.id)
+                    ? 'rgba(99,102,241,0.08)'
+                    : isDark ? 'rgba(255,255,255,0.03)' : 'var(--bg-hover)',
+                  border: `1px solid ${selEst.has(est.id) ? 'rgba(99,102,241,0.3)' : 'var(--border-subtle)'}`,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={selEst.has(est.id)}
+                  onChange={() => toggleEst(est.id)}
+                  className="accent-indigo-500 h-4 w-4 shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                    {est.nombre}
+                  </p>
+                  <p className="flex items-center gap-1 text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                    <MapPin size={8} /> {est.paradaAsignada}
+                  </p>
+                </div>
+              </label>
+            ))}
+          </div>
+        )}
       </Modal>
     </div>
   );

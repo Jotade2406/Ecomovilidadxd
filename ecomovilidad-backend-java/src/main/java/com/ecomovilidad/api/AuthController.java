@@ -2,9 +2,11 @@ package com.ecomovilidad.api;
 
 import com.ecomovilidad.application.tenants.TenantService;
 import com.ecomovilidad.domain.auth.UsuarioApp;
+import com.ecomovilidad.domain.comunidad.Estudiante;
 import com.ecomovilidad.domain.flota.Conductor;
 import com.ecomovilidad.domain.tenants.Tenant;
 import com.ecomovilidad.infrastructure.persistence.repositories.ConductorJpaRepository;
+import com.ecomovilidad.infrastructure.persistence.repositories.EstudianteJpaRepository;
 import com.ecomovilidad.infrastructure.persistence.repositories.UsuarioAppJpaRepository;
 import com.ecomovilidad.infrastructure.security.JwtTokenProvider;
 import com.ecomovilidad.infrastructure.security.TenantProvider;
@@ -34,16 +36,19 @@ public class AuthController {
 
     private final UsuarioAppJpaRepository repo;
     private final ConductorJpaRepository conductorRepo;
+    private final EstudianteJpaRepository estudianteRepo;
     private final PasswordEncoder encoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final TenantService tenantService;
     private final TenantProvider tenantProvider;
 
     public AuthController(UsuarioAppJpaRepository repo, ConductorJpaRepository conductorRepo,
+                          EstudianteJpaRepository estudianteRepo,
                           PasswordEncoder encoder, JwtTokenProvider jwtTokenProvider,
                           TenantService tenantService, TenantProvider tenantProvider) {
         this.repo = repo;
         this.conductorRepo = conductorRepo;
+        this.estudianteRepo = estudianteRepo;
         this.encoder = encoder;
         this.jwtTokenProvider = jwtTokenProvider;
         this.tenantService = tenantService;
@@ -156,6 +161,13 @@ public class AuthController {
             conductor.setTenantId(tenant.getId());
             conductorRepo.save(conductor);
             log.info("  → Conductor creado en flota: {} ({})", request.nombre(), licencia);
+        }
+
+        if ("Estudiante".equals(rol)) {
+            Estudiante estudiante = Estudiante.crear(request.nombre(), nuevo.getId(), "Sin parada asignada");
+            estudiante.setTenantId(tenant.getId());
+            estudianteRepo.save(estudiante);
+            log.info("  → Estudiante creado en comunidad: {}", request.nombre());
         }
 
         log.info("✅ Registro: {} ({}) → institución '{}'", email, rol, tenant.getNombre());

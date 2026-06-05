@@ -263,6 +263,16 @@ public class SuperAdminController {
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "El usuario no tiene rol AdminInstitucion."));
         }
+
+        // Desasignar admins anteriores de este tenant → vuelven al tenant demo (sin asignación)
+        UUID tenantDemo = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        usuarioRepo.findByTenantId(tenantId).stream()
+                .filter(u -> "AdminInstitucion".equals(u.getRole()) && !u.getId().equals(userId))
+                .forEach(u -> {
+                    u.setTenantId(tenantDemo);
+                    usuarioRepo.save(u);
+                });
+
         user.setTenantId(tenantId);
         usuarioRepo.save(user);
         return ResponseEntity.ok(Map.of(

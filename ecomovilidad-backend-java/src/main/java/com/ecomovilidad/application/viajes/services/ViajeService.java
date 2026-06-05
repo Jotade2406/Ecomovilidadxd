@@ -159,7 +159,6 @@ public class ViajeService {
             ev.setTenantId(tenantId);
 
             estudianteEnViajeRepository.save(ev);
-            viaje.agregarEstudiante(ev);
 
             asignados.add(toEstudianteEnViajeResponse(ev, estudiante));
         }
